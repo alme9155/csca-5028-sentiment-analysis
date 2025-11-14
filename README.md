@@ -1,5 +1,5 @@
 # AI-Powered Movie Sentiment Rating System
-## CSCA-5028 Software Architecture for Big Data Applications
+### CSCA-5028 Software Architecture for Big Data Applications 
 
 This project aims to convert user-submitted movie reviews into rating scores using sentiment analysis from a Natural Language Processor. Movie ratings and reviews can be sold to online movie platforms, such as Netflix, to provide movie recommendations.
 
