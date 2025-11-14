@@ -1,6 +1,0 @@
-<configuration>
-    <appender name="basic" class="io.initialcapacity.logging.BasicJSONServiceProvider"/>
-    <root level="info">
-        <appender-ref ref="basic"/>
-    </root>
-</configuration>

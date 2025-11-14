@@ -13,10 +13,11 @@ COPY --from=jre-build /javaruntime $JAVA_HOME
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 ENV PORT=8888
-ENV APP="/opt/applications/basic-server.jar"
+ENV APP="/opt/applications/frontend-server.jar"
+
 
 RUN mkdir /opt/applications
-COPY applications/basic-server/build/libs/basic-server.jar /opt/applications/
+COPY applications/frontend-server/build/libs/frontend-server.jar /opt/applications/
 COPY applications/data-analyzer-server/build/libs/data-analyzer-server.jar /opt/applications/
 COPY applications/data-collector-server/build/libs/data-collector-server.jar /opt/applications/
 

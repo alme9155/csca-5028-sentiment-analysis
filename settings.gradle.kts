@@ -1,7 +1,7 @@
 rootProject.name = "kotlin-ktor-starter"
 
 include(
-    "applications:basic-server",
+    "applications:frontend-server",
     "applications:data-analyzer-server",
     "applications:data-collector-server",
 

@@ -46,7 +46,7 @@ The codebase is tested with [JUnit](https://junit.org/) and uses [Gradle](https:
 1.  Run the servers locally using the below examples.
 
     ```bash
-    java -jar applications/basic-server/build/libs/basic-server-1.0-SNAPSHOT.jar
+    java -jar applications/frontend-server/build/libs/frontend-server-1.0-SNAPSHOT.jar
     ```
 
     Data collector

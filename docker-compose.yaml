@@ -1,12 +1,12 @@
 services:
-  basic-server:
+  frontend-server:
     image: kotlin-ktor-starter
     container_name: kotlin-ktor-server
     ports:
       - "8888:8888"
     environment:
       PORT: 8888
-      APP: /opt/applications/basic-server.jar
+      APP: /opt/applications/frontend-server.jar
   data-analyzer:
     image: kotlin-ktor-starter
     container_name: kotlin-ktor-analyzer
