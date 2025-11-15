@@ -1,6 +1,5 @@
 package cu.csca5028.alme9155.web
 
-import cu.csca5028.alme9155.module
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -13,7 +12,7 @@ import kotlin.test.assertEquals
 class AppTest {
     @Test
     fun testEmptyHome() = testApplication {
-        application { module() }
+        application { frontendModule() }
         val response = client.get("/")
         assertEquals(HttpStatusCode.OK, response.status)
         assertContains(response.bodyAsText(), "AI-Powered Movie Sentiment Rating System")

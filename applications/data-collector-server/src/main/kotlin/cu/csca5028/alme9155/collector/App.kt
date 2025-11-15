@@ -13,7 +13,7 @@ import java.util.TimeZone
 fun Application.collectorModule() {
     routing {
         get("/") {
-            call.respondText("Sentiment Collector API", ContentType.Text.Plain)
+            call.respondText("Data Collector API", ContentType.Text.Plain)
         }
         get("/health") {
             call.respondText("OK", ContentType.Text.Plain)
