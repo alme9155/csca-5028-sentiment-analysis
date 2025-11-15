@@ -1,4 +1,5 @@
 plugins {
+    kotlin("jvm")
     application
 }
 
@@ -16,4 +17,13 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
 
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
+}
+
+application {
+    mainClass.set("cu.csca5028.alme9155.web.AppKt")
+}
+tasks.withType<JavaExec>().configureEach {
+    if (name == "run") {
+        mainClass.set("cu.csca5028.alme9155.web.AppKt")
+    }
 }

@@ -1,15 +1,17 @@
 package cu.csca5028.alme9155.collector
 
-import io.ktor.server.application.*
+import io.ktor.http.ContentType
+import io.ktor.server.application.Application
+import io.ktor.server.application.call
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.routing.*
-import io.ktor.server.response.*
-import io.ktor.server.request.*
-import java.util.*
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
+import java.util.TimeZone
 
-fun Application.module() {
-    install(Routing) {
+fun Application.collectorModule() {
+    routing {
         get("/") {
             call.respondText("Sentiment Collector API", ContentType.Text.Plain)
         }
@@ -22,7 +24,9 @@ fun Application.module() {
 fun main() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
     val port = System.getenv("PORT")?.toInt() ?: 8080
-    embeddedServer(Netty, port = port, host = "0.0.0.0") {
-        module()
-    }.start(wait = true)
+    embeddedServer(
+        factory = Netty,
+        port = port, 
+        module = Application::collectorModule
+    ).start(wait = true)
 }
