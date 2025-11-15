@@ -1,4 +1,5 @@
-package io.initialcapacity.logging
+package cu.csca5028.alme9155.logging
+
 
 import org.slf4j.ILoggerFactory
 import org.slf4j.Logger

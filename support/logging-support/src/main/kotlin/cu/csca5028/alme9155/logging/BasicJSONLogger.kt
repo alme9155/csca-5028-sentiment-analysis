@@ -1,4 +1,4 @@
-package io.initialcapacity.logging
+package cu.csca5028.alme9155.logging
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString

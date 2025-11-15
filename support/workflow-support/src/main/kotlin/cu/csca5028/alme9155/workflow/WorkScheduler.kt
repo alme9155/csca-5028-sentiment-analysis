@@ -15,8 +15,7 @@
  */
 
 // Inspired by code from the Conductor project available at https://github.com/Netflix/conductor
-
-package io.initialcapacity.workflow
+package cu.csca5028.alme9155.workflow
 
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors

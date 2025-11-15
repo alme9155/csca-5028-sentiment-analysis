@@ -1,4 +1,4 @@
-package io.initialcapacity.workflow
+package cu.csca5028.alme9155.workflow
 
 interface Worker<T> {
     val name: String
