@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+
 // project build file.
 plugins {
-    kotlin("jvm") version "2.0.20"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.20" apply false
+    kotlin("jvm") version "2.2.21" apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.2.21" apply false
 }
 
 version = "1.0.0"
@@ -15,22 +17,23 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = "kotlin")
-    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
+    pluginManager.apply("org.jetbrains.kotlin.jvm")
+    pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
 
-    val ktorVersion: String by project
+    val implementation by configurations
+    val testImplementation by configurations
 
     dependencies {
         implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
         implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
         implementation("io.ktor:ktor-server-freemarker-jvm:$ktorVersion")
         implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
-        
+
         testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
         testImplementation("org.jetbrains.kotlin:kotlin-test")
     }
 
-    kotlin {
+    extensions.configure<KotlinJvmProjectExtension> {
         jvmToolchain(21)
     }
 
