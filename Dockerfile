@@ -1,30 +1,52 @@
-FROM eclipse-temurin:21-alpine as jre-build
+# ================================
+# JRE
+# ================================
+FROM eclipse-temurin:21-alpine AS jre-build
 
 RUN $JAVA_HOME/bin/jlink \
- --add-modules java.base,java.desktop,java.sql,java.naming,java.management,java.net.http,jdk.jdwp.agent,jdk.crypto.ec,jdk.unsupported \
- --strip-java-debug-attributes \
- --no-man-pages \
- --no-header-files \
- --compress=2 \
- --output /javaruntime
+    --add-modules \
+        java.base,java.logging,java.management,java.naming,java.net.http,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported \
+    --strip-debug \
+    --no-man-pages \
+    --no-header-files \
+    --compress=2 \
+    --output /javaruntime
 
-FROM alpine
-COPY --from=jre-build /javaruntime $JAVA_HOME
+# ================================
+# Runtime Image
+# ================================
+FROM alpine:3.20
+
+RUN apk add --no-cache ca-certificates tini
+RUN addgroup -g 1001 kotlin && adduser -S -D -u 1001 -G kotlin kotlin
+
 ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH "${JAVA_HOME}/bin:${PATH}"
-ENV PORT=8888
-ENV APP="/opt/applications/frontend-server.jar"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+COPY --from=jre-build /javaruntime $JAVA_HOME
 
+WORKDIR /app
+RUN mkdir -p /opt/applications && chown kotlin:kotlin /opt/applications
 
-RUN mkdir /opt/applications
-COPY applications/frontend-server/build/libs/frontend-server.jar /opt/applications/
-COPY applications/data-analyzer-server/build/libs/data-analyzer-server.jar /opt/applications/
-COPY applications/data-collector-server/build/libs/data-collector-server.jar /opt/applications/
+ARG APP_NAME=frontend-server
+ENV APP_JAR=/opt/applications/app.jar
 
-CMD java
-  -Dorg.slf4j.simpleLogger.dateTimeFormat="yyyy-MM-dd'T'HH:mm:ssZ", \
-  -Dorg.slf4j.simpleLogger.showDateTime=true,  \
-  -Dorg.slf4j.simpleLogger.showShortLogName=true,  \
-  -Djava.security.egd=file:/dev/./urandom \
-  -Dserver.port=${PORT} \
-  -jar ${APP}
+COPY applications/${APP_NAME}/build/libs/${APP_NAME}-1.0-SNAPSHOT.jar ${APP_JAR}
+
+ENV PORT=8080
+EXPOSE ${PORT}
+
+USER kotlin
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
+
+# Entry with tini
+ENTRYPOINT ["/sbin/tini", "--", "java"]
+CMD [ \
+    "-Djava.security.egd=file:/dev/./urandom", \
+    "-Dorg.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd'T'HH:mm:ssZ", \
+    "-Dorg.slf4j.simpleLogger.showDateTime=true", \
+    "-Dorg.slf4j.simpleLogger.showShortLogName=true", \
+    "-jar", \
+    "${APP_JAR}" \
+]
