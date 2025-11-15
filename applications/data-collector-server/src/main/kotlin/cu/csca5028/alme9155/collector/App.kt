@@ -1,32 +1,28 @@
 package cu.csca5028.alme9155.collector
 
-import io.initialcapacity.workflow.WorkScheduler
-import io.ktor.http.ContentType
-import io.ktor.server.application.Application
-import io.ktor.server.application.call
-import io.ktor.server.application.install
+import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.Routing
-import io.ktor.server.routing.get
+import io.ktor.server.routing.*
+import io.ktor.server.response.*
+import io.ktor.server.request.*
 import java.util.*
 
 fun Application.module() {
     install(Routing) {
         get("/") {
-            call.respondText("hi!", ContentType.Text.Html)
+            call.respondText("Sentiment Collector API", ContentType.Text.Plain)
         }
         get("/health") {
             call.respondText("OK", ContentType.Text.Plain)
         }
     }
-    val scheduler = WorkScheduler<ExampleTask>(ExampleWorkFinder(), mutableListOf(ExampleWorker()), 30)
-    scheduler.start()
 }
 
 fun main() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    val port = System.getenv("PORT")?.toInt() ?: 8886
-    embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module() }).start(wait = true)
+    val port = System.getenv("PORT")?.toInt() ?: 8080
+    embeddedServer(Netty, port = port, host = "0.0.0.0") {
+        module()
+    }.start(wait = true)
 }

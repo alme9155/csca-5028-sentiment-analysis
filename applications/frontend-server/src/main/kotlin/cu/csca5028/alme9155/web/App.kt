@@ -29,6 +29,9 @@ fun Application.module() {
         get("/") {
             call.respond(FreeMarkerContent("index.ftl", mapOf("headers" to headers())))
         }
+        get("/health") {
+            call.respondText("OK", io.ktor.http.ContentType.Text.Plain)
+        }
         staticResources("/static/styles", "static/styles")
         staticResources("/static/images", "static/images")
     }
@@ -44,6 +47,8 @@ private fun PipelineContext<Unit, ApplicationCall>.headers(): MutableMap<String,
 
 fun main() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    val port = System.getenv("PORT")?.toInt() ?: 8888
-    embeddedServer(Netty, port = port, host = "0.0.0.0", module = { module() }).start(wait = true)
+    val port = System.getenv("PORT")?.toInt() ?: 8080
+    embeddedServer(Netty, port = port, host = "0.0.0.0") {
+        module()
+    }.start(wait = true)
 }

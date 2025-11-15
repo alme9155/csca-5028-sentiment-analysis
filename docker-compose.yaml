@@ -8,27 +8,30 @@ services:
       args:
         APP_NAME: frontend-server
     container_name: sentiment-analyzer-frontend
-    ports:
-      - "8881:8080"
-    environment:
-      PORT: 8080
+    ports: ["8881:8080"]
+    environment: { PORT: 8080 }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   data-analyzer:
     build:
       args:
         APP_NAME: data-analyzer-server
     container_name: sentiment-analyzer
-    ports:
-      - "8883:8080"
-    environment:
-      PORT: 8080
+    ports: ["8883:8080"]
+    environment: { PORT: 8080 }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
 
   data-collector:
     build:
       args:
         APP_NAME: data-collector-server
     container_name: sentiment-data-collector
-    ports:
-      - "8882:8080"
-    environment:
-      PORT: 8080
+    ports: ["8882:8080"]
+    environment: { PORT: 8080 }
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]

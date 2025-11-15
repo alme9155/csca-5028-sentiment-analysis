@@ -1,4 +1,4 @@
-rootProject.name = "kotlin-ktor-starter"
+rootProject.name = "AI-Powered Movie Sentiment Rating System"
 
 include(
     "applications:frontend-server",
