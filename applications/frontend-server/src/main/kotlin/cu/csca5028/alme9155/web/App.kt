@@ -17,17 +17,17 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.util.pipeline.PipelineContext
 import java.util.TimeZone
-import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory  
+import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory
+import cu.csca5028.alme9155.logging.LogLevel
 
 private val logger = BasicJSONLoggerFactory.getLogger("FrontendServer")
 
 fun Application.frontendModule() {
-    logger.info("starting the app")
-
     install(FreeMarker) {
         templateLoader = ClassTemplateLoader(this::class.java.classLoader, "templates")
     }
     routing {
+        logger.info("get / called.")
         get("/") {
             call.respond(
                 FreeMarkerContent(
@@ -37,6 +37,7 @@ fun Application.frontendModule() {
             )
         }
         get("/health") {
+            logger.info("get /health called.")
             call.respondText("OK", ContentType.Text.Plain)
         }
         staticResources("/static/styles", "static/styles")
@@ -51,6 +52,14 @@ private fun ApplicationCall.headersMap(): Map<String, String> =
 
 fun main() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+    val level = when (System.getenv("LOG_LEVEL")?.uppercase()) {
+        "DEBUG" -> LogLevel.DEBUG
+        "WARN"  -> LogLevel.WARN
+        "ERROR" -> LogLevel.ERROR
+        else    -> LogLevel.INFO
+    }
+    BasicJSONLoggerFactory.setLevel(level)
+
     val port = System.getenv("PORT")?.toInt() ?: 8080
     val logger = BasicJSONLoggerFactory.getLogger("FrontendServer")
 

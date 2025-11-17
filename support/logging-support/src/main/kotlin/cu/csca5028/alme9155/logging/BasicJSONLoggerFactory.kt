@@ -1,21 +1,21 @@
 package cu.csca5028.alme9155.logging
 
-/**
- * Factory for creating BasicJSONLogger instances.
- */
+import java.util.concurrent.ConcurrentHashMap
+import cu.csca5028.alme9155.logging.LogLevel
+
 object BasicJSONLoggerFactory {
-    private val loggers = mutableMapOf<String, BasicJSONLogger>()
+    @Volatile
+    private var currentLevel: LogLevel = LogLevel.INFO
 
-    @Synchronized
-    fun getLogger(name: String): BasicJSONLogger {
-        return loggers.getOrPut(name) { BasicJSONLogger(name) }
+    private val loggers = ConcurrentHashMap<String, BasicJSONLogger>()
+
+    fun setLevel(level: LogLevel) {
+        currentLevel = level
     }
 
-    /**
-     * Clear all loggers (for testing).
-     */
-    @Synchronized
-    fun clear() {
-        loggers.clear()
-    }
+    fun getLogger(name: String): BasicJSONLogger =
+        loggers.getOrPut(name) { BasicJSONLogger(name) }
+
+    internal fun isEnabled(level: LogLevel): Boolean =
+        level >= currentLevel
 }

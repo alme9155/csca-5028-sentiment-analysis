@@ -12,5 +12,5 @@ dependencies {
     implementation(project(":components:data-analyzer"))
     implementation(project(":support:workflow-support"))
     implementation(project(":support:logging-support"))
-
+    implementation("org.slf4j:slf4j-nop:2.0.16")
 }

@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":components:data-analyzer"))
     implementation(project(":support:logging-support"))
     implementation(project(":support:workflow-support"))
+    implementation("org.slf4j:slf4j-nop:2.0.16")
 
     implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-freemarker-jvm:$ktorVersion")

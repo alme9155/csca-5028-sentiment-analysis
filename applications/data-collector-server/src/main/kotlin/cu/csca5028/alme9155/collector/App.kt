@@ -11,6 +11,7 @@ import io.ktor.server.routing.routing
 import java.util.TimeZone
 import io.ktor.server.application.*
 import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory  
+import cu.csca5028.alme9155.logging.LogLevel
 
 private val logger = BasicJSONLoggerFactory.getLogger("DataCollectorServer")
 
@@ -21,6 +22,7 @@ fun Application.collectorModule() {
 
     routing {
         get("/") {
+            logger.info("get / called.")
             val usage = """
                 AI-Powered Movie Sentiment Rating System
                 ------------------------------------------
@@ -45,6 +47,7 @@ fun Application.collectorModule() {
             call.respondText(usage, ContentType.Text.Plain)
         }
         get("/health") {
+            logger.info("get /health called.")
             call.respondText("OK", ContentType.Text.Plain)
         }
     }
@@ -52,6 +55,14 @@ fun Application.collectorModule() {
 
 fun main() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+    val level = when (System.getenv("LOG_LEVEL")?.uppercase()) {
+        "DEBUG" -> LogLevel.DEBUG
+        "WARN"  -> LogLevel.WARN
+        "ERROR" -> LogLevel.ERROR
+        else    -> LogLevel.INFO
+    }
+    BasicJSONLoggerFactory.setLevel(level)
+
     val port = System.getenv("PORT")?.toInt() ?: 8080
     val logger = BasicJSONLoggerFactory.getLogger("DataCollectorServer")
 
