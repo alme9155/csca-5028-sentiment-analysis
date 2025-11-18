@@ -22,6 +22,9 @@ dependencies {
 
 application {
     mainClass.set("cu.csca5028.alme9155.web.AppKt")
+
+    applicationName = project.name
+    version = rootProject.version as String
 }
 tasks.withType<JavaExec>().configureEach {
     if (name == "run") {

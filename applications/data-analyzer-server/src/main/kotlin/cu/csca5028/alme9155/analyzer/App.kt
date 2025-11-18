@@ -1,17 +1,21 @@
 package cu.csca5028.alme9155.analyzer
 
 import io.ktor.http.ContentType
-import io.ktor.server.application.Application
-import io.ktor.server.application.call
+import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import io.ktor.server.response.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import java.util.TimeZone
 import io.ktor.server.application.*
 import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory  
 import cu.csca5028.alme9155.logging.LogLevel
+import cu.csca5028.alme9155.sentiment.*
+import io.ktor.server.routing.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 
 private val logger = BasicJSONLoggerFactory.getLogger("DataAnalyzerServer")
 
@@ -19,6 +23,12 @@ fun Application.analyzerModule() {
     val port = environment.config.propertyOrNull("ktor.deployment.port")?.getString()?.toInt()
         ?: System.getenv("PORT")?.toInt()
         ?: 8080
+
+    install(ContentNegotiation) {
+        json()
+    }
+
+    val model = FakeSentimentModel()
 
     routing {
         get("/") {
@@ -49,6 +59,22 @@ fun Application.analyzerModule() {
         get("/health") {
             logger.info("get /health called.")
             call.respondText("OK", ContentType.Text.Plain)
+        }
+        post("/analyze") {
+            logger.info("get /analyze called.")
+            logger.info("get /analyze before calling call.receive(...).")
+            val request = call.receive<AnalyzeRequest>()
+            logger.info("get /analyze after call.receive(...) called.")
+            val loggedText = request.text
+                .replace('\n', ' ')
+                .take(200) // avoid huge log lines
+            logger.info("POST /analyze called with text=$loggedText")
+
+            logger.info("get /analyze  before calling model.")
+
+            val response: AnalyzeResponse = model.predictSentiment(request.text)
+            //logger.info("POST /analyze called with text=$response")
+            call.respond(response)
         }
     }
 }
