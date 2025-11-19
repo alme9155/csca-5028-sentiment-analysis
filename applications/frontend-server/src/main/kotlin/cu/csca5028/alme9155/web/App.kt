@@ -4,6 +4,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.freemarker.FreeMarker
 import io.ktor.server.freemarker.FreeMarkerContent
 import io.ktor.server.http.content.staticResources
+import io.ktor.server.http.content.*
 import io.ktor.server.netty.Netty
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -81,6 +82,9 @@ fun Application.frontendModule() {
                 logger.error("Failed to call AI Movie Rating Services at $analyzerUrl/analyze", ex)
                 call.respondText("BERT NLP Analyzer service unavailable", status = HttpStatusCode.ServiceUnavailable)
             }
+        }
+        static("/static") {
+            resources("static") 
         }
         get("/") {
             logger.info("get / called.")

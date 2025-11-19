@@ -6,19 +6,20 @@
         <meta name=viewport content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="/static/styles/reset.css">
         <link rel="stylesheet" href="/static/styles/style.css">
-        <link rel="icon" type="image/svg" href="/static/images/favicon.svg">
+        <link rel="stylesheet" href="/static/styles/results.css">        
         <title>${title}</title>
     </head>
     <body>
     <header>
         <div class="container">
-            <h1>AI-Powered Movie Sentiment Rating System</h1>
-        </div>
+            <h1>AI-Powered Movie Rating System</h1>
+            <h3>This project aims to convert user-submitted movie reviews into rating scores using sentiment analysis from a Natural Language Processor. </h3>
         </div>
     </header>
     <section class="callout">
         <div class="container">
-            A <span class="branded">CSCA-5028</span> project by <strong>alme9155</strong>
+            <span class="branded">CSCA-5028</span>
+            <span class="branded">Applications of Software Architecture for Big Data</span>
         </div>
     </section>
     <main>

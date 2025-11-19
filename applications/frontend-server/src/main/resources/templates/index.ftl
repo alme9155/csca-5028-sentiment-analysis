@@ -4,8 +4,9 @@
     <div class="container">
         <h2>Submit a Movie Review</h2>
         <form method="post" action="/analyze" method="post">
-            <textarea name="text" placeholder="Enter your review..." required></textarea>
-            <button type="submit">Analyze Sentiment</button>
+            <input name="name" placeholder="Name of the movie"></input>
+            <textarea name="text" placeholder="Enter your movie review..." required></textarea>
+            <button type="submit">Analyze Review Sentiment</button>
         </form>
     </div>
 </@t.noauthentication>
