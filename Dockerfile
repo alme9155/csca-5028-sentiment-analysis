@@ -1,16 +1,19 @@
 # ================================
 # JRE
 # ================================
+# ================================
+# JRE – Fixed: added java.desktop for FreeMarker
+# ================================
 FROM eclipse-temurin:21-alpine AS jre-build
 
 RUN $JAVA_HOME/bin/jlink \
-    --add-modules \
-        java.base,java.logging,java.management,java.naming,java.net.http,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported \
+    --add-modules java.base,java.logging,java.management,java.naming,java.net.http,java.security.jgss,java.sql,jdk.crypto.ec,jdk.unsupported,java.desktop \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
     --compress=2 \
     --output /javaruntime
+
 
 # ================================
 # Runtime Image
@@ -40,14 +43,14 @@ USER kotlin
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:${PORT}/health || exit 1
 
+# Replace these two lines:
+# ENTRYPOINT ["/sbin/tini", "--", "java"]
+# CMD [ "-Djava.security.egd=...", "-jar", "${APP_JAR}" ]
 
-# Entry with tini
-ENTRYPOINT ["/sbin/tini", "--", "java"]
-CMD [ \
-    "-Djava.security.egd=file:/dev/./urandom", \
-    "-Dorg.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd'T'HH:mm:ssZ", \
-    "-Dorg.slf4j.simpleLogger.showDateTime=true", \
-    "-Dorg.slf4j.simpleLogger.showShortLogName=true", \
-    "-jar", \
-    "${APP_JAR}" \
-]
+# With this single line (shell form):
+CMD ["/sbin/tini", "--", "sh", "-c", "exec java \
+  -Djava.security.egd=file:/dev/./urandom \
+  -Dorg.slf4j.simpleLogger.dateTimeFormat=yyyy-MM-dd'T'HH:mm:ssZ \
+  -Dorg.slf4j.simpleLogger.showDateTime=true \
+  -Dorg.slf4j.simpleLogger.showShortLogName=true \
+  -jar ${APP_JAR}"]

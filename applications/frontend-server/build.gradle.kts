@@ -31,3 +31,18 @@ tasks.withType<JavaExec>().configureEach {
         mainClass.set("cu.csca5028.alme9155.web.AppKt")
     }
 }
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "cu.csca5028.alme9155.web.AppKt"
+    }
+    // Turn the normal JAR into a runnable fat JAR
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.get().output)
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get()
+            .filter { it.name.endsWith("jar") }
+            .map { zipTree(it) }
+    })
+}
