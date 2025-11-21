@@ -28,6 +28,9 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 COPY --from=jre-build /javaruntime $JAVA_HOME
 
 WORKDIR /app
+# RUN mkdir -p /app/models
+# COPY components/sentiment/models/distilbert-sst5-finetuned-v3 /app/models/distilbert-sst5-finetuned-v3
+
 RUN mkdir -p /opt/applications && chown kotlin:kotlin /opt/applications
 
 ARG APP_NAME=frontend-server

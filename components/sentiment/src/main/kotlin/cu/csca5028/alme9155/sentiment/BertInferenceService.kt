@@ -3,6 +3,23 @@ package cu.csca5028.alme9155.sentiment
 import kotlin.random.Random
 import kotlinx.serialization.Serializable
 
+import ai.djl.Application
+import ai.djl.Model
+import ai.djl.huggingface.tokenizers.HuggingFaceTokenizer
+import ai.djl.inference.Predictor
+import ai.djl.modality.Classifications
+import ai.djl.repository.zoo.Criteria
+import ai.djl.repository.zoo.ZooModel
+
+import ai.djl.translate.TranslateException
+import ai.djl.huggingface.translator.TextClassificationTranslatorFactory
+import ai.djl.translate.Translator
+
+import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory  
+import cu.csca5028.alme9155.logging.LogLevel
+
+import java.nio.file.Paths
+
 // Data class for NLP Sentiment Analysis
 @Serializable
 data class AnalyzeRequest(
@@ -27,12 +44,13 @@ val SENTIMENT_LABELS = listOf(
     "very positive"
 )
 
+private const val MODEL_DIR = "models/distilbert-sst5-finetuned-v3"
 
 /**
- * Fake sentiment model to build UI service before applying real pre-trained model.
+ * Sentiment model to build UI service before applying real pre-trained model.
  * Returns an AnalyzeResponse.
  */
-class FakeSentimentModel(
+class CustomSentimentModel(
     private val labels: List<String> = SENTIMENT_LABELS
 ) {
 
@@ -59,3 +77,95 @@ class FakeSentimentModel(
         )
     }
 }
+
+private val logger = BasicJSONLoggerFactory.getLogger("BertInferenceService")
+
+/**
+ * Load Fine-tuned DistilBERT model from local folder 
+ */
+class FineTunedSentimentModel private constructor() {
+
+    private var model: ZooModel<String, Classifications>? = null
+    private var predictor: Predictor<String, Classifications>? = null
+    private var initError: Throwable? = null
+
+    init {
+        logger.info("Loading fine-tuned DistilBERT alme9155/Model from ./$MODEL_DIR ...")
+        val modelPath = Paths.get(MODEL_DIR).toAbsolutePath()
+        logger.info("modelPath: $modelPath")
+
+        try {
+            val criteria = Criteria.builder()
+                .optApplication(Application.NLP.TEXT_CLASSIFICATION)
+                .setTypes(String::class.java, Classifications::class.java)
+                .optModelPath(modelPath)
+                .build()
+
+            val loadedModel = criteria.loadModel()
+            val newPredictor = loadedModel.newPredictor()
+
+            // warm up instance
+            newPredictor.predict("This is a warm-up sentence to load the model.")
+            model = loadedModel
+            predictor = newPredictor
+            logger.info("Fine-tuned model loaded and ready!")
+        } catch (ex: Exception) {
+            initError = ex
+            //logger.error("Warning: Warm-up failed: ${ex.message}", ex)
+        }
+    }
+
+    fun predictSentiment(text: String): AnalyzeResponse {
+        logger.info("predictSentiment() called.")
+        val p = predictor
+        if (p == null) {
+            //logger.error(
+            //    "Fine-tuned model unavailable, using CustomSentimentModel fallback.",
+            //    initError
+            //)
+            return CustomSentimentModel().predictSentiment(text)
+        } else {
+            return try {
+                val result = p!!.predict(text)
+                val items = result.items<Classifications.Classification>()
+
+                val probabilities = items.associate {
+                    val id = it.className.toInt()
+                    SENTIMENT_LABELS[id.coerceIn(0, 4)] to it.probability
+                }
+
+                val best = result.best<Classifications.Classification>()
+                val bestId = best.className.toInt()
+                val bestLabel = SENTIMENT_LABELS[bestId.coerceIn(0, 4)]
+
+                AnalyzeResponse(
+                    text = text,
+                    labelId = bestId,
+                    labelText = bestLabel,
+                    probabilities = probabilities
+                )
+            } catch (ex: Exception) {
+                //logger.error("prediction failure", ex)
+                CustomSentimentModel().predictSentiment(text)
+            }
+        }
+    }
+
+    // Singletone
+    companion object {
+        val instance: FineTunedSentimentModel by lazy { FineTunedSentimentModel() }
+    }
+}
+
+//class HuggingFaceTranslatorFactory(private val tokenizer: HuggingFaceTokenizer) :
+//    TextClassificationTranslatorFactory() {
+//
+//    override fun newInstance(model: ai.djl.Model): Translator<String, Classifications> {
+//        return super.newInstance(model).also { translator ->
+//            // Force DJL to use our pre-loaded tokenizer instead of downloading one
+//            val field = translator.javaClass.superclass.getDeclaredField("tokenizer")
+//            field.isAccessible = true
+//            field.set(translator, tokenizer)
+//        }
+//    }
+//}

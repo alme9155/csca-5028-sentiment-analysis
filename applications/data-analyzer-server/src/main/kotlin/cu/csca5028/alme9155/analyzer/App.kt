@@ -29,8 +29,6 @@ fun Application.analyzerModule() {
         json()
     }
 
-    val model = FakeSentimentModel()
-
     routing {
         get("/") {
             logger.info("get / called.")
@@ -70,7 +68,9 @@ fun Application.analyzerModule() {
                 .take(200) // avoid huge log lines
             logger.info("POST /analyze called with text=$loggedText")
 
-            val response: AnalyzeResponse = model.predictSentiment(text)
+            //val model = CustomSentimentModel()
+            //val response: AnalyzeResponse = model.predictSentiment(text)
+            val response = FineTunedSentimentModel.instance.predictSentiment(text)
             logger.info("POST /analyze called with text=$response")
             call.respond(response)
         }
