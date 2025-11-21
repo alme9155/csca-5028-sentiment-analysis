@@ -1,0 +1,6 @@
+# Ignore all model artifacts in this folder…
+*
+
+# Except readme.
+!README.md
+!.gitignore

@@ -12,3 +12,9 @@ include(
     "support:logging-support",
     "support:workflow-support"
 )
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()   // ← THIS LINE IS REQUIRED FOR SHADOW
+    }
+}

@@ -18,6 +18,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.server.http.content.*
 import kotlinx.serialization.json.*
 import freemarker.template.Configuration
 import freemarker.cache.ClassTemplateLoader
@@ -83,9 +84,7 @@ fun Application.frontendModule() {
                 call.respondText("BERT NLP Analyzer service unavailable", status = HttpStatusCode.ServiceUnavailable)
             }
         }
-        static("/static") {
-            resources("static") 
-        }
+        staticResources("/static", "static")
         get("/") {
             logger.info("get / called.")
             call.respond(

@@ -175,8 +175,8 @@ gradle-app.setting
 logs/
 
 # Ignore fine-tuned model artifacts and large binaries
-distilbert-sst5-finetuned*/
-*.bin
-*.pt
-*.zip
-*.tar
+#distilbert-sst5-finetuned*/
+#*.bin
+#*.pt
+#*.zip
+#*.tar
