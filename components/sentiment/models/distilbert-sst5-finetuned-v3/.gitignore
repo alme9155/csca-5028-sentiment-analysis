@@ -4,3 +4,4 @@
 # Except readme.
 !README.md
 !.gitignore
+!test-model.py
