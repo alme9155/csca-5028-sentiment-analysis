@@ -8,6 +8,7 @@ plugins {
 
 version = "1.0.0"
 val ktorVersion = "3.3.2"
+val kmongoVersion = "4.11.0"
 
 allprojects {
     group = "cu.csca5028.alme9155"
@@ -30,6 +31,14 @@ subprojects {
         implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
         implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
         implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
+
+        implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
+        implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
+        implementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
+        implementation("io.ktor:ktor-client-encoding:$ktorVersion")
+
+        implementation("org.litote.kmongo:kmongo:$kmongoVersion")
+
 
         testImplementation("io.ktor:ktor-server-test-host-jvm:$ktorVersion")
         testImplementation("org.jetbrains.kotlin:kotlin-test")

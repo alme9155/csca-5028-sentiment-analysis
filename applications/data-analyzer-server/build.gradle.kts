@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":support:workflow-support"))
     implementation(project(":support:logging-support"))
     implementation(project(":components:sentiment"))
+    implementation(project(":components:database"))
 
     implementation("org.slf4j:slf4j-nop:2.0.16")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:3.3.2")
