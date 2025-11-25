@@ -35,6 +35,9 @@ fun Application.collectorModule() {
         ?: System.getenv("PORT")?.toInt()
         ?: 8080
 
+    install(ContentNegotiation) {
+        json()
+    }
     routing {
         get("/") {
             logger.info("get / called.")
