@@ -153,6 +153,31 @@ object MongoDBAdapter {
         return 1
     }
 
+    /**
+     * Insert analyze result to review_data collection in MongoDB.
+     * Source: UI, or MQ
+     */
+    fun insertAnalyzeResult(source: String, response: AnalyzeResponse): Int {
+        val trimmedTitle = response.title.trim()
+        if (trimmedTitle.isBlank()) {
+            logger.warn("Skipping analyze result upsert: title is blank")
+            return 0
+        }
+
+        val data = ConvertToAnalyzeResultData(source, response)
+
+        val docJson = json.encodeToString(AnalyzeResultData.serializer(), data)
+        val doc = Document.parse(docJson)
+
+        return try {
+            reviewsCollection.insertOne(doc)
+            logger.info("Inserted new sentiment result for '${data.title}', '$source'")
+            return 1
+        } catch (ex: Exception) {
+            logger.error("Unexpected error inserting '${data.title}'", ex)
+            return 0
+        }
+    }
 
 
     fun close() {

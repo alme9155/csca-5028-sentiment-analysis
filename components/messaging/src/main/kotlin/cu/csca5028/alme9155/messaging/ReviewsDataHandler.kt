@@ -237,7 +237,7 @@ object ReviewDataConsumer {
                 logger.info("Worker $workerId analyzing: \"${msg.title}\" (${msg.reviewText.take(80)}...)")
 
                 val result = model.predictSentiment(msg.title, msg.reviewText)
-                val saved = MongoDBAdapter.upsertAnalyzeResult("MQ", result)
+                val saved = MongoDBAdapter.insertAnalyzeResult("MQ", result)
                 if (saved > 0) {
                     channel.basicAck(delivery.envelope.deliveryTag, false)
                     logger.info("Worker $workerId → Saved sentiment for '${msg.title}'")
