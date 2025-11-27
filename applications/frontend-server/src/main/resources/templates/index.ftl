@@ -8,5 +8,9 @@
             <textarea name="text" placeholder="Enter your movie review..." required></textarea>
             <button type="submit">Analyze Review Sentiment</button>
         </form>
+
+        <p style="margin-top: 2rem;">
+            <h3><a href="/report">View Top Movie Ratings Report</a></h3>
+        </p>        
     </div>
 </@t.noauthentication>

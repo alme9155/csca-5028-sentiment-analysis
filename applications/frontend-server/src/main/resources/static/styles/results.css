@@ -200,12 +200,19 @@
 }
 
 .bar {
-    animation: grow 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    height: 100%;
+    border-radius: 15px;
+    position: relative;
+    background: var(--orange);
+    box-shadow: inset 0 -3px 6px rgba(0,0,0,0.1), 0 2px 5px rgba(0, 0, 0, 0.15);
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: grow 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes grow {
-    from { width: 0; }
-    to   { width: attr(style.width); }
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
 }
 
 @media (max-width: 640px) {
@@ -230,4 +237,62 @@
         margin-bottom: 0.5rem;
         margin-right: 0;
     }
+     .top-movies-table {
+        overflow-x: auto;
+    }
+
+    .top-movies-table table {
+        min-width: 600px;
+    }
+}
+
+.report-summary {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    line-height: 1.7;
+}
+
+/* Top movies table */
+.top-movies-table {
+    margin: 3rem 0;
+}
+
+.top-movies-table h3 {
+    margin-bottom: 1rem;
+    font-size: 1.6rem;
+    color: var(--text-dark);
+}
+
+.top-movies-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--glass-bg);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--soft-shadow);
+}
+
+.top-movies-table thead {
+    background: var(--orange);
+    color: #ffffff;
+}
+
+.top-movies-table th,
+.top-movies-table td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+.top-movies-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.top-movies-table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.top-movies-table tbody tr:hover {
+    background: rgba(127, 82, 255, 0.08);
 }

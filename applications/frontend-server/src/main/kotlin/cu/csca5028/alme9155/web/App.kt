@@ -111,35 +111,21 @@ fun Application.frontendModule() {
 
             try {
                 logger.info("Report URL: $analyzerUrl/report")
-                val response: HttpResponse = httpClient.get("$analyzerUrl/top-movies") {
-                    contentType(ContentType.Application.Json)
-                    setBody(Json.encodeToJsonElement(
-                        mapOf(
-                            "title" to title,
-                            "text" to text
-                        )).toString()
-                    )
-                }
-                val jsonObj = Json.parseToJsonElement(response.bodyAsText()).jsonObject
-                val labelText = jsonObj["labelText"]!!.jsonPrimitive.content
-                //val predictedLabel = jsonObj["predicted_label"]!!.jsonPrimitive.double.toFloat()
-                val probabilitiesMap = jsonObj["probabilities"]!!.jsonObject               
-                val probabilities = SENTIMENT_LABELS.map { 
-                    label -> val value = probabilitiesMap[label]!!.jsonPrimitive.double
-                    object {
-                        val label = label
-                        val value = value
-                    }
-                }.sortedByDescending { it.value }
+                val response: HttpResponse = httpClient.get("$analyzerUrl/top-movies")
+                val jsonArray = Json.parseToJsonElement(response.bodyAsText()).jsonArray
 
+                val topMovies = jsonArray.map { jsonElement ->
+                    val jsonObj = jsonElement.jsonObject
+                    val score = jsonObj["score"]!!.jsonPrimitive.double
+                    object {
+                        val title: String = jsonObj["title"]!!.jsonPrimitive.content
+                        val score: Double = score
+                        val scorePercent: Double = score * 20.0  // 0-5 → 0-100% for bar width
+                    }
+                }.sortedByDescending { it.score }.take(10)
                 call.respond(FreeMarkerContent(
-                    "results.ftl", 
-                    mapOf(
-                        "title" to title,
-                        "text" to text,
-                        "labelText" to labelText,
-                        "probabilities" to probabilities
-                    )
+                    "report.ftl",
+                    mapOf("topMovies" to topMovies)
                 ))
             } catch (ex: Exception) {
                 logger.error("Failed to call report service at $analyzerUrl/report", ex)
