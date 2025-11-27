@@ -15,6 +15,7 @@ import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory
 import cu.csca5028.alme9155.logging.LogLevel
 import cu.csca5028.alme9155.sentiment.*
 import cu.csca5028.alme9155.database.MongoDBAdapter 
+import cu.csca5028.alme9155.messaging.*
 
 import io.ktor.server.routing.*
 import io.ktor.serialization.kotlinx.json.*
@@ -114,6 +115,9 @@ fun main() {
 
     val port = System.getenv("PORT")?.toInt()?: 8080
     val logger = BasicJSONLoggerFactory.getLogger("DataAnalyzerServer")
+
+    logger.info("Starting Review Consumer worker pool..")
+    ReviewDataConsumer.start()
 
     logger.info("Starting Data Analyzer API on port $port")
     embeddedServer(Netty, port = port, host = "0.0.0.0") {

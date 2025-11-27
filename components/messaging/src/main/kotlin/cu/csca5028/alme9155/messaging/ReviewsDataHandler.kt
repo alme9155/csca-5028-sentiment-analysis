@@ -1,8 +1,7 @@
 package cu.csca5028.alme9155.messaging
 
-import com.rabbitmq.client.Channel
-import com.rabbitmq.client.Connection
-import com.rabbitmq.client.ConnectionFactory
+import com.rabbitmq.client.*
+import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -11,7 +10,8 @@ import org.bson.Document
 import cu.csca5028.alme9155.database.MongoDBAdapter
 import cu.csca5028.alme9155.database.RawMovieReview
 import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory
-import cu.csca5028.alme9155.sentiment.AnalyzeRequest
+import cu.csca5028.alme9155.sentiment.*
+import kotlin.system.exitProcess
 
 @Serializable
 data class MovieReviewMessage(
@@ -166,5 +166,91 @@ object ReviewsDataHandler {
     fun close() {
         try { channel.close() } catch (_: Exception) {}
         try { connection.close() } catch (_: Exception) {}
+    }
+}
+
+
+/**
+ * Consumer for the Message queue data
+ * Main responsibility is to call AI sentiment analysis and then store the result to database.
+ */
+object ReviewDataConsumer {
+    private const val QUEUE_NAME = "movie_reviews_queue"
+    private const val PREFETCH_COUNT = 10
+    private const val WORKER_COUNT = 4
+    private const val MAX_RETRIES = 100
+    private const val RETRY_DELAY_MS = 5000L
+
+    private val json = Json { ignoreUnknownKeys = true }
+    private val logger = BasicJSONLoggerFactory.getLogger("ReviewDataConsumer")
+    private val model = FineTunedSentimentModel.instance
+
+    fun start() {
+        logger.info("Starting $WORKER_COUNT subscriber to process sentiment analysis...")
+
+        val connectionFactory = ConnectionFactory().apply {
+            host = System.getenv("RABBITMQ_HOST") ?: RabbitMQConfig.RABBITMQ_HOST
+            port = System.getenv("RABBITMQ_PORT")?.toIntOrNull() ?: RabbitMQConfig.RABBITMQ_PORT
+            username = System.getenv("RABBITMQ_USER") ?: RabbitMQConfig.RABBITMQ_USER
+            password = System.getenv("RABBITMQ_PASS") ?: RabbitMQConfig.RABBITMQ_PASS
+        }
+
+        var connection: Connection? = null
+        var channel: Channel? = null
+        for (attempt in 1..MAX_RETRIES) {
+            try {
+                val connection: Connection by lazy { connectionFactory.newConnection() }
+                val channel = connection.createChannel().apply { basicQos(PREFETCH_COUNT) }
+
+                logger.info("Connected to RabbitMQ on attempt $attempt! Starting $WORKER_COUNT workers...")
+                repeat(WORKER_COUNT) { workerId ->
+                    GlobalScope.launch(Dispatchers.IO) {
+                        logger.info("Worker $workerId started")
+                        consumeMessages(workerId, channel)
+                    }
+                }
+                logger.info("All $WORKER_COUNT workers started. Processing queue '$QUEUE_NAME'...")
+                return
+                //connected = true
+                //break
+            } catch (e: Exception) {
+                logger.warn("RabbitMQ connection failed (attempt $attempt/$MAX_RETRIES): ${e.message}")
+                channel?.close()
+                connection?.close()
+                if (attempt < MAX_RETRIES) { Thread.sleep(RETRY_DELAY_MS) }
+            }
+        }
+        logger.error("Failed to connect to RabbitMQ after $MAX_RETRIES attempts. Exiting.")
+        exitProcess(1)
+
+        //if (!connected) {
+        //    logger.error("Failed to connect to RabbitMQ after $MAX_RETRIES attempts. Exiting.")
+        //    exitProcess(1) // Graceful shutdown
+        //}
+    }
+
+    private suspend fun consumeMessages(workerId: Int, channel: Channel) = withContext(Dispatchers.IO) {
+        val deliverCallback = DeliverCallback { _, delivery ->
+            val payload = String(delivery.body)
+            try {
+                val msg = json.decodeFromString<MovieReviewMessage>(payload)
+                logger.info("Worker $workerId analyzing: \"${msg.title}\" (${msg.reviewText.take(80)}...)")
+
+                val result = model.predictSentiment(msg.title, msg.reviewText)
+                val saved = MongoDBAdapter.upsertAnalyzeResult("MQ", result)
+                if (saved > 0) {
+                    channel.basicAck(delivery.envelope.deliveryTag, false)
+                    logger.info("Worker $workerId → Saved sentiment for '${msg.title}'")
+                } else {
+                    channel.basicNack(delivery.envelope.deliveryTag, false, true)
+                    logger.warn("Failed to save result, requeued: ${msg.title}")
+                }
+            } catch (e: Exception) {
+                logger.error("Worker $workerId failed on message: $payload", e)
+                channel.basicNack(delivery.envelope.deliveryTag, false, true)
+            }
+        }
+        val cancelCallback = CancelCallback { logger.warn("Consumer $workerId cancelled") }
+        channel.basicConsume(QUEUE_NAME, false, "sentiment-worker-$workerId", deliverCallback, cancelCallback)
     }
 }
