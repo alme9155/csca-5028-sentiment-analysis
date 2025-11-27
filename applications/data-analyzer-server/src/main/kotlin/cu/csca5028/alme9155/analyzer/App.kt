@@ -14,7 +14,7 @@ import io.ktor.server.application.*
 import cu.csca5028.alme9155.logging.BasicJSONLoggerFactory  
 import cu.csca5028.alme9155.logging.LogLevel
 import cu.csca5028.alme9155.sentiment.*
-import cu.csca5028.alme9155.database.MongoDBAdapter 
+import cu.csca5028.alme9155.database.*
 import cu.csca5028.alme9155.messaging.*
 
 import io.ktor.server.routing.*
@@ -65,6 +65,11 @@ fun Application.analyzerModule() {
             logger.info("get /health called.")
             call.respondText("OK", ContentType.Text.Plain)
         }
+        get("/top-movies") {
+            logger.info("GET /top-movies called")
+            val topMovies = MongoDBAdapter.getTopMovies()
+            call.respond(topMovies)
+        }
         post("/analyze") {
             val req = call.receive<AnalyzeRequest>()
             val title = req.title.trim()
@@ -78,8 +83,6 @@ fun Application.analyzerModule() {
                 call.respond(HttpStatusCode.BadRequest, "Text is required and cannot be empty")
                 return@post
             }
-
-
             val loggedText = req.text
                 .replace('\n', ' ')
                 .take(200) // avoid huge log lines

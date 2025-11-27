@@ -103,6 +103,49 @@ fun Application.frontendModule() {
                 )
             )
         }
+        get("/report") {
+            logger.info("GET /report called.")
+
+            // sample output
+            //[{"title":"On the Line: The Richard Williams Story","score":3.5},{"title":"One Flew Over the Cuckoo's Nest","score":3.1666666666666665},{"title":"Touch the Wall","score":3.0},{"title":"Sunset Boulevard","score":2.7857142857142856},{"title":"Pink Floyd: Live at Pompeii","score":2.75},{"title":"Fight Club","score":2.625},{"title":"The Human Condition III: A Soldier's Prayer","score":2.5},{"title":"Rapid Response","score":2.5},{"title":"The Lord of the Rings: The Two Towers","score":2.5},{"title":"The Empire Strikes Back","score":2.5}]
+
+            try {
+                logger.info("Report URL: $analyzerUrl/report")
+                val response: HttpResponse = httpClient.get("$analyzerUrl/top-movies") {
+                    contentType(ContentType.Application.Json)
+                    setBody(Json.encodeToJsonElement(
+                        mapOf(
+                            "title" to title,
+                            "text" to text
+                        )).toString()
+                    )
+                }
+                val jsonObj = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+                val labelText = jsonObj["labelText"]!!.jsonPrimitive.content
+                //val predictedLabel = jsonObj["predicted_label"]!!.jsonPrimitive.double.toFloat()
+                val probabilitiesMap = jsonObj["probabilities"]!!.jsonObject               
+                val probabilities = SENTIMENT_LABELS.map { 
+                    label -> val value = probabilitiesMap[label]!!.jsonPrimitive.double
+                    object {
+                        val label = label
+                        val value = value
+                    }
+                }.sortedByDescending { it.value }
+
+                call.respond(FreeMarkerContent(
+                    "results.ftl", 
+                    mapOf(
+                        "title" to title,
+                        "text" to text,
+                        "labelText" to labelText,
+                        "probabilities" to probabilities
+                    )
+                ))
+            } catch (ex: Exception) {
+                logger.error("Failed to call report service at $analyzerUrl/report", ex)
+                call.respondText("Analyzer report service unavailable", status = HttpStatusCode.ServiceUnavailable)
+            }
+        }
         get("/health") {
             logger.info("get /health called.")
             call.respondText("OK", ContentType.Text.Plain)

@@ -55,7 +55,8 @@ fun Application.collectorModule() {
                 
                 Usage:
                 - POST /collect
-                    
+                - POST /publish
+                
                 Example (curl):
                 curl -X POST http://localhost:$port/collect \
                     

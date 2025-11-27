@@ -3,7 +3,7 @@ package cu.csca5028.alme9155.database
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoCollection
 import com.mongodb.client.MongoDatabase
-import com.mongodb.client.model.ReplaceOptions
+import com.mongodb.client.model.*
 import org.bson.Document
 import org.litote.kmongo.KMongo
 
@@ -14,9 +14,17 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+// Raw data class to persist External API Data
 data class RawMovieReview(
     val movieId: String,
     val raw: Document
+)
+
+// Moview Review summary for report
+@Serializable
+data class MovieRatings(
+    val title: String,
+    val score: Double
 )
 
 @Serializable
@@ -179,6 +187,40 @@ object MongoDBAdapter {
         }
     }
 
+    /**
+     * Calculate average rating score group by movie title, then return top 10 movies.
+     * This will be used web report.
+     */
+    fun getTopMovies(): List<MovieRatings> {
+        val pipeline = listOf(
+            Aggregates.group(
+                "\$title",
+                Accumulators.avg("score", "\$labelId")
+            ),
+            Aggregates.sort(Sorts.descending("score")),
+            Aggregates.limit(10),
+            Aggregates.project(
+                Projections.fields(
+                    Projections.excludeId(),
+                    Projections.computed("title", "\$_id"),
+                    Projections.include("score")
+                )
+            )
+        )
+
+        val results = mutableListOf<MovieRatings>()
+        try {
+            reviewsCollection.aggregate(pipeline, Document::class.java).forEach { doc ->
+                val title = doc.getString("title") ?: "Unknown Movie"
+                val score = doc.getDouble("score") ?: 0.0
+                results += MovieRatings(title, score)
+            }
+            logger.info("Fetched top 10 movies by sentiment ratings: ${results.size} found")
+        } catch (ex: Exception) {
+            logger.error("Failed to fetch top movies", ex)
+        }
+        return results
+    }
 
     fun close() {
         client.close()
