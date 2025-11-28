@@ -4,7 +4,7 @@
 <div class="container result-page">
     <h1>Top Movie Ratings Report</h1>
     <div class="top-movies-table">
-        <h3>Top Movies (Sorted by Rating)</h3>
+        <h3>(Sorted by Review Sentiment Analysis Rating)</h3>
         <table>
             <thead>
                 <tr>
