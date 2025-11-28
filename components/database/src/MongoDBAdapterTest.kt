@@ -8,26 +8,19 @@ import com.mongodb.client.result.UpdateResult
 import cu.csca5028.alme9155.sentiment.AnalyzeResponse
 import io.mockk.*
 import org.bson.Document
-import org.bson.conversions.Bson
-import org.junit.jupiter.api.AfterEach
+import org.bson.conversions.*
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 
 class MongoDBAdapterTest {
 
-    private lateinit var mockApiCollection: MongoCollection<Document>
     private lateinit var mockReviewsCollection: MongoCollection<Document>
 
     @BeforeEach
     fun setUp() {
         mockkStatic(System::class)
         every { System.currentTimeMillis() } returns 1_000L
-
-        mockApiCollection = mockk(relaxed = true)
         mockReviewsCollection = mockk(relaxed = true)
-
-        injectMongoCollection("apiCollection", mockApiCollection)
         injectMongoCollection("reviewsCollection", mockReviewsCollection)
     }
 
@@ -48,14 +41,6 @@ class MongoDBAdapterTest {
         field.isAccessible = true
         val lazyMock: Lazy<MongoCollection<Document>> = lazy { mock }
         field.set(null, lazyMock)
-    }
-
-    @Test
-    fun testUpsertMoviesRevies() {
-        val count = MongoDBAdapter.upsertMoviesReviews(emptyList())
-        assertEquals(0, count)
-
-        verify { mockApiCollection wasNot Called }
     }
 
     @Test
