@@ -74,4 +74,16 @@ class AppTest {
 
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
+
+    @Test
+    fun testMetrics() = testApplication {
+        application { analyzerModule() }
+
+        val response = client.get("/metrics")
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val body = response.bodyAsText()
+        assertContains(body, "app_uptime_seconds{service=\"data-analyzer-server\"")
+    }
+
 }
