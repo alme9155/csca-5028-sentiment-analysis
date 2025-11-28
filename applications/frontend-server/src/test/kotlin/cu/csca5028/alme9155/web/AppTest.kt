@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlinx.coroutines.runBlocking
 
 class AppTest {
     @Test
@@ -23,8 +24,27 @@ class AppTest {
             body.isNotBlank(),
             "Home page body should not be blank"
         )
-
-
-        //assertContains(response.bodyAsText(), "AI-Powered Movie Sentiment Rating System")
     }
+
+    @Test
+    fun testHealth() = testApplication {
+        application { frontendModule() }
+
+        val response = runBlocking { client.get("/health") }
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val body = runBlocking { response.bodyAsText() }
+        assertEquals("OK", body)
+    }
+
+    @Test
+    fun testMetrics() = testApplication {
+        application { frontendModule() }
+
+        val response = runBlocking { client.get("/metrics") }
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val body = runBlocking { response.bodyAsText() }
+        assertContains(body, "app_uptime_seconds{service=\"frontend-server\"")
+    }    
 }
