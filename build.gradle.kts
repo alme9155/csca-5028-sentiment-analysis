@@ -51,4 +51,11 @@ subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
     }
+
+    tasks.register("integrationTest") {
+        group = "verification"
+        description = "Execute integration tests"
+        dependsOn(":integration-test:integrationTest")
+    }
+
 }

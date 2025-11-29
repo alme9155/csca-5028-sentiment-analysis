@@ -11,7 +11,9 @@ include(
     ":components:messaging",
 
     "support:logging-support",
-    "support:workflow-support"
+    "support:workflow-support",
+    "integration-test"
+
 )
 pluginManagement {
     repositories {
