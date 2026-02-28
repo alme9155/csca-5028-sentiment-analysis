@@ -22,9 +22,9 @@ This project aims to convert user-submitted movie reviews into rating scores usi
 * **Production ML Engine:** A dedicated **Sentiment Data Analyzer** service that hosts the trained model and serves predictions via a RESTful API.
 * **High-Concurrency Backend:** Built with **Ktor (Kotlin)** to ensure asynchronous, non-blocking request handling.
 * **Hybrid Workflow Architecture:**
-    * **Interactive:** Low-latency inference path utilizing **Redis** for caching frequent sentiment results.
-    * **Scheduled:** Message-driven retraining and data ingestion pipeline powered by **RabbitMQ**.
-  
+    * **Interactive:** Low-latency inference path for real-time sentiment predictions via the web UI
+    * **Batch:** Asynchronous processing pipeline where the Data Collector pulls critic reviews from external APIs, publishes them to RabbitMQ, and the Analyzer consumes messages to perform sentiment classification and rating in the background. Results are stored in MongoDB for reporting and dashboard visualization (e.g., top-10 movies by sentiment).
+
 ---
 ### Tech Stack
 
