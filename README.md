@@ -1,4 +1,5 @@
-# AI-Powered Movie Review → Rating Engine (Fine-Tuned NLP + Production-Grade ML Web Service)
+# AI-Powered Movie Review Rating Engine 
+## (Fine-Tuned NLP + Production-Grade ML Web Service)
 ### CSCA-5028 Software Architecture for Big Data Applications Project
 
 A graduate software-architecture project that **fine-tunes a transformer-based NLP model for movie review sentiment / rating prediction**, then **serves the trained model behind a production-style microservice stack** to power a simple web UI and reporting workflow.
