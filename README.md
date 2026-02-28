@@ -32,7 +32,7 @@ This project aims to convert user-submitted movie reviews into rating scores usi
 | :--- | :--- |
 | **Machine Learning** | Python, Hugging Face Transformers, PyTorch/TensorFlow, DistilBERT |
 | **Backend / API** | Kotlin, Ktor (JVM), RESTful APIs |
-| **Data & Cache** | Google Cloud Firestore (NoSQL), Redis |
+| **Data & Cache** | MongoDB (NoSQL), Redis |
 | **Messaging** | RabbitMQ (Asynchronous Task Processing) |
 | **Infrastructure** | Docker, Google Cloud Platform (GCP), GitHub Actions (CI/CD) |
 | **Observability** | Prometheus, Grafana |
@@ -59,15 +59,15 @@ The system powers real-time user reviews and batch critic analysis — exactly t
 |--------------------|-------------------------------------------------|
 | **ML Model**       | DistilBERT (Hugging Face Transformers) + Transfer Learning |
 | **Dataset**        | SST-5 (Stanford Sentiment Treebank 5) — movie reviews |
-| **Backend**        | Kotlin + **Ktor 2.x** + Netty                   |
+| **Backend**        | Kotlin + Ktor + Netty                           |
 | **ML Inference**   | Fine-tuned DistilBERT served inside Ktor service |
 | **Messaging**      | **RabbitMQ** (publish/subscribe for batch & interactive jobs) |
 | **Frontend**       | FreeMarker HTML templates                       |
 | **Persistence**    | NoSQL Document Store (MongoDB-compatible)       |
-| **Containerization**| Docker + docker-compose                         |
+| **Containerization**| Docker + docker-compose                        |
 | **Monitoring**     | Prometheus + Grafana                            |
 | **Build & CI**     | Gradle (Kotlin DSL), JUnit                      |
-| **Cloud**          | Google Cloud + Heroku ready (Procfile)          |
+| **Cloud**          | Google Cloud                                    |
 
 ---
 
